@@ -199,22 +199,23 @@ function animate(newtime) {
         }
 
         canvas.addEventListener('touchstart', function(event) {
-            event = event.touches[0];
-            //event.preventDefault();
+            event.preventDefault();  
+            var event = event.touches[0];
+            
             get_touch_pos = true;
            // mousedown_action(event);
         }, false);
             
         canvas.addEventListener('touchend', function(event) {
-            event = event.touches[0];
-            //event.preventDefault();
+            event.preventDefault();  
+            var event = event.touches[0];
             mouseup_action(event);
         }, false);
         
         if (get_touch_pos) {
         canvas.addEventListener('touchmove', function(event) {
-            event = event.touches[0];
-            //event.preventDefault();
+            event.preventDefault();
+            var event = event.touches[0];
             mousemove_action(event);
         }, false);
         }
