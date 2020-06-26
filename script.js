@@ -12,6 +12,8 @@ var touch_point;
 var touch_start_time;
 var touch_end_time;
 
+var grow_rate = 400;
+var decay_rate = 800;
 var beta_decay = 0.05;
 var amp = 2;
 
@@ -58,8 +60,8 @@ startAnimating(fps);
 
 function draw() {
     
-    W = canvas.width = 500; //window.innerWidth;
-    H = canvas.height = 500; //window.innerHeight;
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
 
     
     ctx.fillStyle = 'rgba(0,0,0,1)';
@@ -74,6 +76,7 @@ function draw() {
     let breaks = contact_data.length;
     let whisp_height = Math.min(H, 10 + Math.floor(400*t));
 
+
     for (let i = 0; i < whisp_height; i++) {
 
         let alpha_i = 0.15*(1 - 1*(i/H)**(1));
@@ -82,16 +85,13 @@ function draw() {
             let data = contact_data[j];
             if ( j === breaks - 1) {
                 if (contact) {
-                    dt_start = 0;
-                        
+                    dt_start = 0;       
                 }
                 else {
-                    dt_start = 400*(t - touch_end_time);
-                    //dt_end = 600*(t - data[0][1]);
-                
+                    dt_start = grow_rate*(t - touch_end_time);
                 }
                 
-                dt_end = 600*(t - touch_start_time);
+                dt_end = decay_rate*(t - touch_start_time);
                 
 
                 start = touch_point + dt_start;
@@ -103,8 +103,8 @@ function draw() {
                 }
             }
             else {
-                dt_start = 400*(t - data[1][1]);
-                dt_end = 600*(t - data[0][1]);
+                dt_start = grow_rate*(t - data[1][1]);
+                dt_end = decay_rate*(t - data[0][1]);
 
                 start = data[1][0] + dt_start;
                 end = data[0][0] + dt_end;
@@ -139,9 +139,7 @@ function draw() {
     else {
         t += t_purerate;
     }
-    
-
-    
+        
 }
 
 
@@ -201,22 +199,23 @@ function animate(newtime) {
         }
 
         canvas.addEventListener('touchstart', function(event) {
-            event.touches[0];
-            event.preventDefault();
-            mousedown_action(e);
+            event = event.touches[0];
+            //event.preventDefault();
+            get_touch_pos = true;
+           // mousedown_action(event);
         }, false);
             
         canvas.addEventListener('touchend', function(event) {
-            event.touches[0];
-            event.preventDefault();
-            mouseup_action(e);
+            event = event.touches[0];
+            //event.preventDefault();
+            mouseup_action(event);
         }, false);
         
         if (get_touch_pos) {
         canvas.addEventListener('touchmove', function(event) {
-            event.touches[0];
-            event.preventDefault();
-            mousemove_action(e);
+            event = event.touches[0];
+            //event.preventDefault();
+            mousemove_action(event);
         }, false);
         }
     }
