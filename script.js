@@ -1,4 +1,4 @@
-var f = 2;
+var f = 0.5;
 var f_min =0;
 var f_max = 100;
 
@@ -12,6 +12,7 @@ var touch_point;
 var touch_start_time;
 var touch_end_time;
 
+var brightness = 0.15;
 var grow_rate = 400;
 var decay_rate = 800;
 var beta_decay = 0.05;
@@ -35,10 +36,10 @@ const record_animation = false;
 var stop_animation = false;
 
 const pure_time_mode = true;
-const t_purerate = .01;
+const t_purerate = .005;
 
-var F = 1;
-const fps = 30;
+var F = 2;
+const fps = 60;
 const total_frames = 1000;
 const t_max = F*2*Math.PI;
 const t_rate = t_max/total_frames;
@@ -54,24 +55,26 @@ var fpsInterval, startTime, now, then, elapsed;
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 
+W = canvas.width = window.innerWidth;
+H = canvas.height = window.innerHeight;
 
 startAnimating(fps);
 
 
 function draw() {
     
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
+    W = window.innerWidth;
+    H = window.innerHeight;
 
     
-    ctx.fillStyle = 'rgba(0,0,0,1)';
+    ctx.fillStyle = 'rgba(0,0,0,.3)';
     ctx.fillRect(0, 0, W, H);
 
     let k = 1;
     let w = 2;
     
-    f = 1; 
-    freq = .5*Math.cos(t/F) + .25*Math.sin(t/F);
+     
+    freq = .5*Math.cos(t/F) + .25*Math.sin(.1*t/F);
     
     let breaks = contact_data.length;
     let whisp_height = Math.min(H, 10 + Math.floor(400*t));
@@ -79,7 +82,7 @@ function draw() {
 
     for (let i = 0; i < whisp_height; i++) {
 
-        let alpha_i = 0.15*(1 - 1*(i/H)**(1));
+        let alpha_i = brightness*(1 - 1*(i/H)**(1));
         if (breaks > 0) {
         for (let j = breaks - 1; j >= 0; j--) {
             let data = contact_data[j];
@@ -162,7 +165,7 @@ function animate(newtime) {
 
     if (elapsed > fpsInterval) {
     then = now - (elapsed % fpsInterval);
-    
+
     draw();
         
     if(record_animation) {
@@ -324,7 +327,7 @@ function stwave2(x, A, L, f, t) {
 
 function wave(i, k, W, H, freq, f, t) {
 
-     y = W/2 + stwave2(i*k, W/32 + W/8*(i/W)**1 , H, 1.5*(i/H), t) + stwave2(i*k, W/2*freq*(i/H)**4, H, freq*10, f*t);
+     y = W/2 + stwave2(i*k, W/32 + W/8*(i/W)**1 , H, 1.5*(i/H), f*t) + stwave2(i*k, W/2*freq*(i/H)**4, H, freq*10, f*t);
     return y;
 
 }
