@@ -37,7 +37,9 @@ var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 
 var scale = window.devicePixelRatio;
-//console.log(scale);
+var re_scale = scale;
+
+
 
 
 startAnimating(fps);
@@ -221,12 +223,13 @@ function mousemove_action(e) {
         if(contact_test(e)) {
             contact_action(e);     
         }
-    } 
+    }
+    
 }
 
 function contact_test(event) {
     point_x = event.clientX;
-    point_y = canvas.height - event.clientY;
+    point_y = (canvas.height - event.clientY);
     y = wave(point_y, 1, W, whisp_height, freq, f, t);
     d = Math.max(10,2 + 0.2*H*(point_y/H)**4);
     if (Math.abs(y - point_x) < 2*d) {
@@ -246,7 +249,7 @@ function contact_action(e) {
 
 function setTouchPoint(canvas, event) {   
     touch_start_time = t;
-    touch_point_start = canvas.height - event.clientY;
+    touch_point_start = (canvas.height - event.clientY)/re_scale;
     touch_point = touch_point_start;
     contact_data.push([[touch_point_start, touch_start_time]]);
 }
@@ -254,7 +257,7 @@ function setTouchPoint(canvas, event) {
 
 function wave(i, k, W, H, freq, f, t) {
 
-    y = W/2 + Math.cos(f*t)*((W/32 + W/8*(i/W)**1)*Math.sin(1.5*(i/H)*2*Math.PI*i*k/H) + (W/2*freq*(i/H)**4)*Math.sin(freq*10*2*Math.PI*i*k/H));
+    y = W/2 + Math.cos(f*t)*((W/32 + W/8*(i*k/W)**1)*Math.sin(1.5*(i*k/H)*2*Math.PI*i*k/H) + (W/2*freq*(i*k/H)**4)*Math.sin(freq*10*2*Math.PI*i*k/H));
    return y;
 }
 
