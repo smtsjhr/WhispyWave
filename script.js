@@ -1,5 +1,5 @@
 var f = 0.5;
-var F = 2;
+var F = 2.2;
 var freq;
 
 var brightness = 0.15;
