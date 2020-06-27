@@ -36,14 +36,23 @@ var H;
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 
+var scale = window.devicePixelRatio;
+//console.log(scale);
+
 
 startAnimating(fps);
 
 
 function draw() {
     
+    
+
     W = canvas.width = window.innerWidth;
     H = canvas.height = window.innerHeight;
+
+    ctx.save();
+    ctx.translate(-W/2*(scale-1), -H*(scale-1));
+    ctx.scale(scale, scale);
 
     ctx.fillStyle = 'rgba(0,0,0,1)';
     ctx.fillRect(0, 0, W, H);
@@ -107,6 +116,8 @@ function draw() {
     }
       
     t += t_rate;
+
+    ctx.restore();
            
 }
 
