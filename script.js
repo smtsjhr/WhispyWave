@@ -1,5 +1,5 @@
 var f = 0.5;
-var F = 2.2;
+var F = 1.9;
 var freq;
 
 var brightness = 0.15;
@@ -13,6 +13,7 @@ const t_rate = .01;
 const fps = 30;
 
 var whisp_height;
+var max_whisp_height = 800;
 
 var contact = false;
 var touch_point_start;
@@ -27,7 +28,7 @@ var get_mouse_pos = false;
 var get_touch_pos = false;
 
 var fpsInterval, startTime, now, then, elapsed;
-var stop_animation;
+var stop_animation = false;
 
 var W;
 var H;
@@ -50,7 +51,7 @@ function draw() {
     freq = .5*Math.cos(t/F) + .25*Math.sin(.1*t/F);
     
     let breaks = contact_data.length;
-    whisp_height = Math.min(700, Math.min(H, 10 + Math.floor(400*t)));
+    whisp_height = Math.min(max_whisp_height, Math.min(H, 10 + Math.floor(400*t)));
 
     for (let i = 0; i < whisp_height; i++) {
 
@@ -118,26 +119,24 @@ function startAnimating(fps) {
     animate();
  }
 
+
 function animate(newtime) {
 
-
     requestAnimationFrame(animate);
-
+ 
     now = newtime;
     elapsed = now - then;
 
     if (elapsed > fpsInterval) {
         then = now - (elapsed % fpsInterval);
-
-        draw();    
+        if(!stop_animation) {
+        draw();
+        }    
     }
 
-    if (stop_animation) {
-        return;
-    }
-
+    
     if(enable_interaction) {
-
+        
         canvas.addEventListener('mousedown', mousedown_action);
             
         canvas.addEventListener('mouseup', mouseup_action);
