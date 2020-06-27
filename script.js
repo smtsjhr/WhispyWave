@@ -51,7 +51,7 @@ function draw() {
     freq = .5*Math.cos(t/F) + .25*Math.sin(.1*t/F);
     
     let breaks = contact_data.length;
-    whisp_height = Math.min(max_whisp_height, Math.min(H, 10 + Math.floor(400*t)));
+    whisp_height = Math.min(max_whisp_height, Math.min(H, 10 + Math.floor(grow_rate*t)));
 
     for (let i = 0; i < whisp_height; i++) {
 
@@ -99,7 +99,7 @@ function draw() {
     if ((Math.floor(window.performance.now()/1000))%5) {
         for (let j = breaks - 2; j >= 0; j--) {
             let data = contact_data[j];
-            let start = data[1][0] + 400*(t - data[1][1]);
+            let start = data[1][0] + grow_rate*(t - data[1][1]);
             if (start > H) {
                 contact_data.splice(j,1);
             }
