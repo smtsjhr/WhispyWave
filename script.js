@@ -1,10 +1,18 @@
 var f = 0.5;
-var f_min =0;
-var f_max = 100;
+var F = 2;
+var freq;
 
-var freq = 1;
-var freq_min = 0;
-var freq_max = 1;
+var brightness = 0.15;
+var grow_rate = 400;
+var decay_rate = 600;
+var beta_decay = 0.05;
+var amp = 2;
+
+var t = 0;
+const t_rate = .01;
+const fps = 30;
+
+var whisp_height;
 
 var contact = false;
 var touch_point_start;
@@ -12,77 +20,41 @@ var touch_point;
 var touch_start_time;
 var touch_end_time;
 
-var brightness = 0.15;
-var grow_rate = 400;
-var decay_rate = 800;
-var beta_decay = 0.05;
-var amp = 2;
-
 var contact_data = [];
-
-var W;
-var H;
-
-
-//var interaction_variables = [touch_point];
-
 
 const enable_interaction = true;
 var get_mouse_pos = false;
 var get_touch_pos = false;
 
-
-const record_animation = false;
-var stop_animation = false;
-
-const pure_time_mode = true;
-const t_purerate = .005;
-
-var F = 2;
-const fps = 60;
-const total_frames = 1000;
-const t_max = F*2*Math.PI;
-const t_rate = t_max/total_frames;
-
-var t = 0;
-var frame = 0;
-var loop = 0;
-
 var fpsInterval, startTime, now, then, elapsed;
+var stop_animation;
 
-
+var W;
+var H;
 
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 
-W = canvas.width = window.innerWidth;
-H = canvas.height = window.innerHeight;
 
 startAnimating(fps);
 
 
 function draw() {
     
-    W = window.innerWidth;
-    H = window.innerHeight;
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
 
-    
-    ctx.fillStyle = 'rgba(0,0,0,.3)';
+    ctx.fillStyle = 'rgba(0,0,0,1)';
     ctx.fillRect(0, 0, W, H);
-
-    let k = 1;
-    let w = 2;
-    
-     
+       
     freq = .5*Math.cos(t/F) + .25*Math.sin(.1*t/F);
     
     let breaks = contact_data.length;
-    let whisp_height = Math.min(H, 10 + Math.floor(400*t));
-
+    whisp_height = Math.min(700, Math.min(H, 10 + Math.floor(400*t)));
 
     for (let i = 0; i < whisp_height; i++) {
 
-        let alpha_i = brightness*(1 - 1*(i/H)**(1));
+        let alpha_i = brightness*(1 - 1*(i/whisp_height)**(1));
         if (breaks > 0) {
         for (let j = breaks - 1; j >= 0; j--) {
             let data = contact_data[j];
@@ -118,11 +90,10 @@ function draw() {
         }
         }
         
-        let y = wave(i, k, W, H, freq, f, t);
-        let h = 2 + 0.2*H*(i/H)**4;
-        whisp(i, alpha_i, H,k, h, w, y);
+        let y = wave(i, 1, W, whisp_height, freq, f, t);
+        let h = 2 + 0.2*whisp_height*(i/whisp_height)**4;
+        whisp(i, alpha_i, H, 1, h, 2, y);
     }
-
 
     if ((Math.floor(window.performance.now()/1000))%5) {
         for (let j = breaks - 2; j >= 0; j--) {
@@ -133,18 +104,10 @@ function draw() {
             }
         }
     }
-    
- 
-    if(!pure_time_mode) {
-        frame = (frame+1)%total_frames;
-        t = t_rate*frame;
-    }
-    else {
-        t += t_purerate;
-    }
-        
+      
+    t += t_rate;
+           
 }
-
 
 function startAnimating(fps) {
     
@@ -164,24 +127,9 @@ function animate(newtime) {
     elapsed = now - then;
 
     if (elapsed > fpsInterval) {
-    then = now - (elapsed % fpsInterval);
+        then = now - (elapsed % fpsInterval);
 
-    draw();
-        
-    if(record_animation) {
-        if (frame + 1 === total_frames) {
-            loop += 1;
-        }
-
-        if (loop === 1) { 
-            let frame_number = frame.toString().padStart(total_frames.toString().length, '0');
-            download('image_'+frame_number+'.png', canvas);
-        }
-
-        if (loop === 2) { stop_animation = true }
-    }
-        
-    
+        draw();    
     }
 
     if (stop_animation) {
@@ -194,6 +142,8 @@ function animate(newtime) {
             
         canvas.addEventListener('mouseup', mouseup_action);
 
+        canvas.addEventListener('mouseleave', mouseup_action);
+
         if (get_mouse_pos) {
             canvas.addEventListener('mousemove', mousemove_action);
         }
@@ -204,9 +154,7 @@ function animate(newtime) {
         canvas.addEventListener('touchstart', function(event) {
             event.preventDefault();  
             var event = event.touches[0];
-            
             get_touch_pos = true;
-           // mousedown_action(event);
         }, false);
             
         canvas.addEventListener('touchend', function(event) {
@@ -224,51 +172,6 @@ function animate(newtime) {
         }
     }
 
-}
-
-function whisp(i, alpha_i, H,k, h, w, y) {
-        ctx.fillStyle = `rgba(255,255,255,${alpha_i})`;
-        ctx.fillRect( y, H - i*k, h, w);
-        ctx.fillRect( y, H - i*k, w, h);
-        ctx.fillRect( y + h, H - i*k, w, h);
-}
-
-function decay_factor(i, start, end, beta, base, amp) {
-    return base+ amp*0.5*(Math.exp(-beta*(i - start)) + Math.exp(-beta*(end - i)));
-}
-
-
-
-function contact_test(event) {
-    point_x = event.clientX;
-    point_y = canvas.height - event.clientY;
-    y = wave(point_y, 1, W, H, freq, f, t);
-    d = Math.max(10,2 + 0.2*H*(point_y/H)**4);
-    if (Math.abs(y - point_x) < 2*d) {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
-function setTouchPoint(canvas, event) {   
-    touch_start_time = t;
-    touch_point_start = canvas.height - event.clientY;
-    touch_point = touch_point_start;
-    contact_data.push([[touch_point_start, touch_start_time]]);
-}
-
-function getTouchPosition(canvas, event) {
-    var event = event.touches[0];
-    interaction(canvas,event, ...interaction_variables)
-}
-
-function contact_action(e) {
-    contact = true;
-    get_mouse_pos = true;
-    get_touch_pos = true;
-    setTouchPoint(canvas, e);
 }
 
 function mousedown_action(e) {
@@ -311,41 +214,47 @@ function mousemove_action(e) {
     } 
 }
 
-
-
-function stwave1(x, A, L, f, t) {
-
-    return A*0.5*(Math.sin(f*2*Math.PI*x/L + t) + Math.sin(f*2*Math.PI*x/L - t));
-
+function contact_test(event) {
+    point_x = event.clientX;
+    point_y = canvas.height - event.clientY;
+    y = wave(point_y, 1, W, whisp_height, freq, f, t);
+    d = Math.max(10,2 + 0.2*H*(point_y/H)**4);
+    if (Math.abs(y - point_x) < 2*d) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
-function stwave2(x, A, L, f, t) {
-
-    return A*Math.sin(f*2*Math.PI*x/L)*Math.cos(t);
-
+function contact_action(e) {
+    contact = true;
+    get_mouse_pos = true;
+    get_touch_pos = true;
+    setTouchPoint(canvas, e);
 }
+
+function setTouchPoint(canvas, event) {   
+    touch_start_time = t;
+    touch_point_start = canvas.height - event.clientY;
+    touch_point = touch_point_start;
+    contact_data.push([[touch_point_start, touch_start_time]]);
+}
+
 
 function wave(i, k, W, H, freq, f, t) {
 
-     y = W/2 + stwave2(i*k, W/32 + W/8*(i/W)**1 , H, 1.5*(i/H), f*t) + stwave2(i*k, W/2*freq*(i/H)**4, H, freq*10, f*t);
-    return y;
-
+    y = W/2 + Math.cos(f*t)*((W/32 + W/8*(i/W)**1)*Math.sin(1.5*(i/H)*2*Math.PI*i*k/H) + (W/2*freq*(i/H)**4)*Math.sin(freq*10*2*Math.PI*i*k/H));
+   return y;
 }
 
+function whisp(i, alpha, H,k, h, w, y) {
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+    ctx.fillRect( y, H - i*k, h, w);
+    ctx.fillRect( y, H - i*k, w, h);
+    ctx.fillRect( y + h, H - i*k, w, h);
+}
 
-
-function download(filename, canvas) {
-    dataURL = canvas.toDataURL();
-    var element = document.createElement('a');
-    element.setAttribute('href', dataURL);
-    element.setAttribute('download', filename);
-
-    element.style.display = 'none';
-    document.body.appendChild(element);
-
-    element.click();
-
-    document.body.removeChild(element);
-
-    console.log('Downloaded ' + filename);
+function decay_factor(i, start, end, beta, base, amp) {
+    return base+ amp*0.5*(Math.exp(-beta*(i - start)) + Math.exp(-beta*(end - i)));
 }
