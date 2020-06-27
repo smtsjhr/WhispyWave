@@ -40,24 +40,17 @@ var scale = window.devicePixelRatio;
 var re_scale = scale;
 
 
-
-
 startAnimating(fps);
 
 
 function draw() {
     
-    
-
     W = canvas.width = window.innerWidth;
     H = canvas.height = window.innerHeight;
 
     ctx.save();
-    ctx.translate(-W/2*(scale-1), -H*(scale-1));
+    ctx.translate(-W/2*(scale-1), -H*(scale-1) )
     ctx.scale(scale, scale);
-
-    ctx.fillStyle = 'rgba(0,0,0,1)';
-    ctx.fillRect(0, 0, W, H);
        
     freq = .5*Math.cos(t/F) + .25*Math.sin(.1*t/F);
     
@@ -102,9 +95,9 @@ function draw() {
         }
         }
         
-        let y = wave(i, 1, W, whisp_height, freq, f, t);
+        let y = wave(i, 1, 1, W, whisp_height, freq, f, t);
         let h = 2 + 0.2*whisp_height*(i/whisp_height)**4;
-        whisp(i, alpha_i, H, 1, h, 2, y);
+        whisp(i, alpha_i, H, 1, h, 2, W/2, y);
     }
 
     if ((Math.floor(window.performance.now()/1000))%5) {
@@ -205,7 +198,6 @@ function mouseup_action(e) {
 }
 
 function mousemove_action(e) {
-    
     if(contact) {
         if (contact_test(e)) {
             p = canvas.height - e.clientY;
@@ -229,9 +221,9 @@ function mousemove_action(e) {
 
 function contact_test(event) {
     point_x = event.clientX;
-    point_y = (canvas.height - event.clientY);
-    y = wave(point_y, 1, W, whisp_height, freq, f, t);
-    d = Math.max(10,2 + 0.2*H*(point_y/H)**4);
+    point_y = (canvas.height - event.clientY)/re_scale;
+    y = W/2 + wave(point_y, re_scale, 1, W, whisp_height, freq, f, t);
+    d = Math.max(10,2 + 0.2*whisp_height*(point_y/whisp_height)**4);
     if (Math.abs(y - point_x) < 2*d) {
         return true;
     }
@@ -255,17 +247,17 @@ function setTouchPoint(canvas, event) {
 }
 
 
-function wave(i, k, W, H, freq, f, t) {
+function wave(i, scale, k, W, H, freq, f, t) {
 
-    y = W/2 + Math.cos(f*t)*((W/32 + W/8*(i*k/W)**1)*Math.sin(1.5*(i*k/H)*2*Math.PI*i*k/H) + (W/2*freq*(i*k/H)**4)*Math.sin(freq*10*2*Math.PI*i*k/H));
+    y = scale*Math.cos(f*t)*((W/32 + W/8*(i*k/W)**1)*Math.sin(1.5*(i*k/H)*2*Math.PI*i*k/H) + (W/2*freq*(i*k/H)**4)*Math.sin(freq*10*2*Math.PI*i*k/H));
    return y;
 }
 
-function whisp(i, alpha, H,k, h, w, y) {
+function whisp(i, alpha, H,k, h, w, pos, y) {
     ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-    ctx.fillRect( y, H - i*k, h, w);
-    ctx.fillRect( y, H - i*k, w, h);
-    ctx.fillRect( y + h, H - i*k, w, h);
+    ctx.fillRect( pos + y, H - i*k, h, w);
+    ctx.fillRect( pos + y, H - i*k, w, h);
+    ctx.fillRect( pos + y + h, H - i*k, w, h);
 }
 
 function decay_factor(i, start, end, beta, base, amp) {
