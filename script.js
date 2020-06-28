@@ -3,8 +3,6 @@ var F = 1.9;
 var freq;
 
 var brightness = 0.15;
-var grow_rate = 400;
-var decay_rate = 600;
 var beta_decay = 0.05;
 var amp = 2;
 
@@ -39,6 +37,8 @@ var ctx = canvas.getContext('2d');
 var scale = window.devicePixelRatio;
 var re_scale = scale;
 
+var grow_rate = 400/re_scale;
+var decay_rate = 600/re_scale;
 
 startAnimating(fps);
 
