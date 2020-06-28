@@ -101,8 +101,9 @@ function draw() {
         whisp(i, alpha_i, H, 1, h, 2, W/2, y);
     }
 
-    if ((Math.floor(window.performance.now()/1000))%5) {
-        for (let j = breaks - 2; j >= 0; j--) {
+    //(Math.floor(window.performance.now()/1000))%5
+    if (breaks > 5) {
+        for (let j = breaks - 2; j > 0; j--) {
             let data = contact_data[j];
             let start = data[1][0] + grow_rate*(t - data[1][1]);
             if (start > H/re_scale) {
