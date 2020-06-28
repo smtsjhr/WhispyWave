@@ -56,7 +56,7 @@ function draw() {
     
     let breaks = contact_data.length;
 
-    whisp_height = Math.floor(Math.min(0.8*H/2, 10 + Math.floor(grow_rate*t)));
+    whisp_height = Math.floor(Math.min(0.8*H/re_scale, 10 + Math.floor(grow_rate*t)));
 
     for (let i = 0; i < whisp_height; i++) {
 
@@ -105,7 +105,7 @@ function draw() {
         for (let j = breaks - 2; j >= 0; j--) {
             let data = contact_data[j];
             let start = data[1][0] + grow_rate*(t - data[1][1]);
-            if (start > H) {
+            if (start > H/re_scale) {
                 contact_data.splice(j,1);
             }
         }
