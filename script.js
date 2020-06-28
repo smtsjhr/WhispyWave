@@ -55,7 +55,7 @@ function draw() {
     freq = .5*Math.cos(t/F) + .25*Math.sin(.1*t/F);
     
     let breaks = contact_data.length;
-    whisp_height = Math.min(max_whisp_height, Math.min(H, 10 + Math.floor(grow_rate*t)));
+    whisp_height = Math.min(max_whisp_height, Math.min(H, 10 + Math.floor(grow_rate*t)))/re_scale;
 
     for (let i = 0; i < whisp_height; i++) {
 
